@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "pages/index.html", "use": "@vercel/static" },
+    { "src": "auth.html", "use": "@vercel/static" },
+    { "src": "style.css", "use": "@vercel/static" },
+    { "src": "script.js", "use": "@vercel/static" },
+    { "src": "DemoCSV/**", "use": "@vercel/static" },
+    { "src": "screenshots/**", "use": "@vercel/static" },
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    {
+      "src": "^/(?:style\\.css|script\\.js|auth\\.html)$",
+      "dest": "/$1"
+    },
+    {
+      "src": "^/pages/(.*\\.(?:html|css|js|map|png|jpg|jpeg|gif|svg|webp|ico|pdf|csv))$",
+      "dest": "/pages/$1"
+    },
+    {
+      "src": "^/DemoCSV/(.*)$",
+      "dest": "/DemoCSV/$1"
+    },
+    {
+      "src": "^/screenshots/(.*)$",
+      "dest": "/screenshots/$1"
+    },
+    {
+      "src": "^/public/(.*)$",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "^/auth(?:\\.html)?$",
+      "dest": "/auth.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/pages/index.html"
+    }
+  ]
+}
