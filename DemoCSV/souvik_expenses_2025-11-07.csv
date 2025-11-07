@@ -1,0 +1,11 @@
+Description,Amount,Category,Date
+"Zomato Order",450,"food","2025-11-05"
+"Uber Ride",230,"transport","2025-11-06"
+"Netflix Subscription",499,"entertainment","2025-11-01"
+"Amazon Purchase",1200,"shopping","2025-11-04"
+"Electricity Bill",900,"bills","2025-11-03"
+"Snacks",150,"food","2025-10-30"
+"Bus Pass Recharge",500,"transport","2025-11-02"
+"Movie Tickets",700,"entertainment","2025-10-31"
+"Headphones",1500,"shopping","2025-10-29"
+"Miscellaneous",300,"other","2025-11-07"

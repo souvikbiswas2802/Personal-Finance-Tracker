@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-wallet"></i>
+                    <h1>Personal Finance Tracker</h1>
+                </div>
+                <div class="theme-toggle">
+                    <button id="themeToggle" class="btn">
+                        <i class="fas fa-moon"></i> Night Mode
+                    </button>
+                    <button id="logoutBtn" class="btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="expenseBtn">
+                <i class="fas fa-arrow-up"></i> Expenses (Debits)
+            </button>
+            <button class="toggle-btn" id="incomeBtn">
+                <i class="fas fa-arrow-down"></i> Income (Credits)
+            </button>
+        </div>
+
+        <div class="dashboard">
+            <div class="card income">
+                <div class="card-header">
+                    <div class="card-title">Total Income</div>
+                    <div class="card-icon">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                </div>
+                <div class="card-value" id="incomeValue">₹0.00</div>
+                <div class="card-desc">All your income sources</div>
+            </div>
+
+            <div class="card expense">
+                <div class="card-header">
+                    <div class="card-title">Total Expenses</div>
+                    <div class="card-icon">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                </div>
+                <div class="card-value" id="expenseValue">₹0.00</div>
+                <div class="card-desc">All your expenses</div>
+            </div>
+
+            <div class="card balance">
+                <div class="card-header">
+                    <div class="card-title">Current Balance</div>
+                    <div class="card-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                </div>
+                <div class="card-value" id="balanceValue">₹0.00</div>
+                <div class="card-desc">Income minus expenses</div>
+            </div>
+        </div>
+
+        <!-- Expense Page -->
+        <div class="page active" id="expensePage">
+            <div class="csv-section">
+                <h2 class="section-title"><i class="fas fa-file-csv"></i> Import Expenses from CSV</h2>
+                <p>Upload your bank statement or expense tracking CSV file to automatically add expenses to your
+                    dashboard.</p>
+                <div class="file-input-wrapper">
+                    <div class="file-input-button">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose CSV File
+                    </div>
+                    <input type="file" id="csvFileExpense" accept=".csv">
+                </div>
+                <button class="btn btn-primary" id="processCSVExpense" style="margin-top: 15px;">
+                    <i class="fas fa-cogs"></i> Process CSV
+                </button>
+                <div id="csvExpenseStatus" class="csv-status"></div>
+            </div>
+
+            <div class="main-content">
+                <div class="chart-section">
+                    <h2 class="section-title"><i class="fas fa-chart-pie"></i> Expense Distribution</h2>
+                    <div class="card">
+                        <div class="chart-container">
+                            <canvas id="expenseChart"></canvas>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title" style="margin-top: 30px;"><i class="fas fa-chart-line"></i> Monthly Trend
+                    </h2>
+                    <div class="card">
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-section">
+                    <div class="form-section">
+                        <h2 class="section-title"><i class="fas fa-plus-circle"></i> Add New Expense</h2>
+                        <form id="expenseForm">
+                            <div class="form-group">
+                                <label for="expenseDescription">Description</label>
+                                <input type="text" id="expenseDescription" class="form-control"
+                                    placeholder="What did you spend on?" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="expenseAmount">Amount (₹)</label>
+                                <input type="number" id="expenseAmount" class="form-control" placeholder="0.00"
+                                    min="0.01" step="0.01" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="expenseCategory">Category</label>
+                                <select id="expenseCategory" class="form-control" required>
+                                    <option value="">Select a category</option>
+                                    <option value="food">Food & Dining</option>
+                                    <option value="transport">Transportation</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="shopping">Shopping</option>
+                                    <option value="bills">Bills & Utilities</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="expenseDate">Date</label>
+                                <input type="date" id="expenseDate" class="form-control" required max="">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i> Add Expense
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="records-table">
+                        <h2 class="section-title"><i class="fas fa-list"></i> Recent Expenses</h2>
+                        <div style="margin-bottom: 15px;">
+                            <button class="btn btn-primary" id="downloadExpensesCSV">
+                                <i class="fas fa-download"></i> Download Expenses CSV
+                            </button>
+                        </div>
+                        <div id="expensesContainer">
+                            <div class="no-data" id="noExpenses">
+                                <i class="fas fa-receipt"></i>
+                                <h3>No Expenses Yet</h3>
+                                <p>Add your first expense to get started</p>
+                            </div>
+                            <table style="display: none;" id="expensesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Category</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expensesList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Income Page -->
+        <div class="page" id="incomePage">
+            <div class="csv-section">
+                <h2 class="section-title"><i class="fas fa-file-csv"></i> Import Income from CSV</h2>
+                <p>Upload your income tracking CSV file to automatically add income to your dashboard.</p>
+                <div class="file-input-wrapper">
+                    <div class="file-input-button">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose CSV File
+                    </div>
+                    <input type="file" id="csvFileIncome" accept=".csv">
+                </div>
+                <button class="btn btn-primary" id="processCSVIncome" style="margin-top: 15px;">
+                    <i class="fas fa-cogs"></i> Process CSV
+                </button>
+                <div id="csvIncomeStatus" class="csv-status"></div>
+            </div>
+
+            <div class="main-content">
+                <div class="chart-section">
+                    <h2 class="section-title"><i class="fas fa-chart-pie"></i> Income Distribution</h2>
+                    <div class="card">
+                        <div class="chart-container">
+                            <canvas id="incomeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title" style="margin-top: 30px;"><i class="fas fa-chart-line"></i> Monthly Trend
+                    </h2>
+                    <div class="card">
+                        <div class="chart-container">
+                            <canvas id="incomeTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-section">
+                    <div class="form-section">
+                        <h2 class="section-title"><i class="fas fa-plus-circle"></i> Add New Income</h2>
+                        <form id="incomeForm">
+                            <div class="form-group">
+                                <label for="incomeDescription">Description</label>
+                                <input type="text" id="incomeDescription" class="form-control"
+                                    placeholder="Source of income" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="incomeAmount">Amount (₹)</label>
+                                <input type="number" id="incomeAmount" class="form-control" placeholder="0.00"
+                                    min="0.01" step="0.01" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="incomeCategory">Category</label>
+                                <select id="incomeCategory" class="form-control" required>
+                                    <option value="">Select a category</option>
+                                    <option value="salary">Salary</option>
+                                    <option value="investment">Investment Returns</option>
+                                    <option value="freelance">Freelance Work</option>
+                                    <option value="gift">Gifts</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="incomeDate">Date</label>
+                                <input type="date" id="incomeDate" class="form-control" required max="">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i> Add Income
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="records-table">
+                        <h2 class="section-title"><i class="fas fa-list"></i> Recent Income</h2>
+                        <div style="margin-bottom: 15px;">
+                            <button class="btn btn-primary" id="downloadIncomeCSV">
+                                <i class="fas fa-download"></i> Download Income CSV
+                            </button>
+                        </div>
+                        <div id="incomeContainer">
+                            <div class="no-data" id="noIncome">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <h3>No Income Yet</h3>
+                                <p>Add your first income to get started</p>
+                            </div>
+                            <table style="display: none;" id="incomeTable">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Category</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="incomeList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Personal Finance Tracker | Made With ❤️ by Souvik Biswas</p>
+        </div>
+    </footer>
+    <script src="../script.js"></script>
+</body>
+
+</html>

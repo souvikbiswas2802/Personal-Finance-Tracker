@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login / Signup</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f7f7f9
+    }
+
+    .card {
+      background: #fff;
+      padding: 50px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+      width: 400px
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 12px
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px
+    }
+
+    .login-form, .signup-form {
+      display: flex;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      margin-bottom: 5px;
+      margin-right: 15px;
+    }
+
+    button {
+      padding: 10px;
+      border-radius: 6px;
+      border: 0;
+      background: #2b7cff;
+      color: #fff;
+      cursor: pointer
+    }
+
+    .muted {
+      color: #666;
+      font-size: 13px;
+      margin-top: 8px
+    }
+
+    .switch {
+      background: transparent;
+      border: 0;
+      color: #2b7cff;
+      cursor: pointer
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card" id="authCard">
+    <h1 id="formTitle">Login</h1>
+
+    <div id="loginForm">
+      <input id="loginUsername" placeholder="Username" />
+      <input id="loginPassword" type="password" placeholder="Password" />
+      <div class="row"><button id="loginBtn">Login</button><button id="toSignup" class="switch">Create account</button>
+      </div>
+      <div class="muted">No account? Create one — it's stored locally in your browser.</div>
+      <div id="loginMsg" class="muted" style="color:crimson;margin-top:8px"></div>
+    </div>
+
+    <div id="signupForm" style="display:none">
+      <input id="signupUsername" placeholder="Choose username" />
+      <input id="signupPassword" type="password" placeholder="Choose password" />
+      <div class="row"><button id="signupBtn">Sign up</button><button id="toLogin" class="switch">Back to login</button>
+      </div>
+      <div class="muted">Passwords are stored as SHA-256 hashes in localStorage.</div>
+      <div id="signupMsg" class="muted" style="color:crimson;margin-top:8px"></div>
+    </div>
+  </div>
+
+  <script>
+    const USERS_KEY = 'finance_users_v1';
+    const CURRENT_USER_KEY = 'finance_current_user';
+
+    function getUsers() {
+      try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch (e) { return {}; }
+    }
+    function setUsers(obj) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(obj));
+    }
+    async function sha256hex(str) {
+      const enc = new TextEncoder();
+      const data = enc.encode(str);
+      const hashBuf = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuf));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const formTitle = document.getElementById('formTitle');
+    const loginMsg = document.getElementById('loginMsg');
+    const signupMsg = document.getElementById('signupMsg');
+
+    document.getElementById('toSignup').addEventListener('click', () => {
+      loginForm.style.display = 'none'; signupForm.style.display = 'block'; formTitle.textContent = 'Create account'; loginMsg.textContent = '';
+    });
+    document.getElementById('toLogin').addEventListener('click', () => {
+      loginForm.style.display = 'block'; signupForm.style.display = 'none'; formTitle.textContent = 'Login'; signupMsg.textContent = '';
+    });
+
+    document.getElementById('signupBtn').addEventListener('click', async () => {
+      const u = document.getElementById('signupUsername').value.trim();
+      const p = document.getElementById('signupPassword').value || '';
+      if (!u) { signupMsg.textContent = 'Choose a username'; return; }
+      if (p.length < 4) { signupMsg.textContent = 'Choose a longer password (min 4 chars)'; return; }
+      const users = getUsers();
+      if (users[u]) { signupMsg.textContent = 'Username already exists'; return; }
+      const h = await sha256hex(p);
+      users[u] = h;
+      setUsers(users);
+      localStorage.setItem(CURRENT_USER_KEY, u);
+      localStorage.setItem(`financeTracker_${u}`, JSON.stringify({ income: [], expenses: [], expenseCategories: {}, incomeCategories: {} }));
+      window.location.href = "/pages/index.html";
+    });
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value || '';
+      if (!u || !p) { loginMsg.textContent = 'enter username and password'; return; }
+      const users = getUsers();
+      const stored = users[u];
+      if (!stored) { loginMsg.textContent = 'user not found'; return; }
+      const h = await sha256hex(p);
+      if (h !== stored) { loginMsg.textContent = 'incorrect password'; return; }
+      localStorage.setItem(CURRENT_USER_KEY, u);
+      window.location.href = "/pages/index.html";
+    });
+
+    (function redirectIfSignedIn() {
+      const cur = localStorage.getItem(CURRENT_USER_KEY);
+      if (cur) {
+        window.location.href = "/pages/index.html";
+      }
+    })();
+  </script>
+</body>
+
+</html>
